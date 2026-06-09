@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>神国龍体之確証シール管理</title>
+    <link rel="stylesheet" href="./styles.css">
+  </head>
+  <body>
+    <header class="app-header">
+      <div>
+        <h1>神国龍体之確証シール管理</h1>
+        <p>名簿の順番を基準に、護摩供ごとのシール番号と受渡日を管理します。</p>
+      </div>
+      <div class="header-actions">
+        <button id="exportCsvButton" type="button">Excel出力</button>
+        <button id="resetButton" type="button" class="danger">初期状態に戻す</button>
+      </div>
+    </header>
+
+    <main>
+      <section class="control-band" aria-label="割り振り操作">
+        <div class="field">
+          <label for="ceremonySelect">護摩供</label>
+          <select id="ceremonySelect"></select>
+        </div>
+        <div class="field compact">
+          <label for="startNumber">開始番号</label>
+          <input id="startNumber" type="text" inputmode="numeric" pattern="[0-9]*" placeholder="開始" autocomplete="off">
+        </div>
+        <div class="field compact">
+          <label for="endNumber">終了番号</label>
+          <input id="endNumber" type="text" inputmode="numeric" pattern="[0-9]*" placeholder="終了" autocomplete="off">
+        </div>
+        <div class="field compact date-field">
+          <label for="bulkDateText">一括受渡日</label>
+          <input id="bulkDateText" type="text" inputmode="numeric" autocomplete="off">
+        </div>
+        <button id="assignButton" type="button" class="primary">自動割り振り</button>
+        <button id="copyExclusionsButton" type="button">前の護摩供から対象外コピー</button>
+        <div id="statusText" class="status" role="status"></div>
+      </section>
+
+      <section class="summary-strip" aria-label="集計">
+        <div><span id="personCount">0</span><small>名簿人数</small></div>
+        <div><span id="assignedCount">0</span><small>割り振り済み</small></div>
+        <div><span id="excludedCount">0</span><small>対象外</small></div>
+        <div><span id="blankCount">0</span><small>未処理</small></div>
+      </section>
+
+      <section class="workspace">
+        <aside class="editor-panel" aria-label="選択中の護摩供入力">
+          <div class="panel-heading">
+            <h2 id="editorTitle">収天</h2>
+            <button id="addPersonButton" type="button">名前追加</button>
+          </div>
+          <div class="add-person" id="addPersonForm" hidden>
+            <input id="newPersonName" type="text" placeholder="氏名">
+            <input id="newPersonNote" type="text" placeholder="備考">
+            <button id="savePersonButton" type="button">追加</button>
+          </div>
+          <div id="ceremonyRows" class="ceremony-rows"></div>
+        </aside>
+
+        <section class="table-area" aria-label="全体一覧">
+          <table id="overviewTable" class="overview-table"></table>
+        </section>
+      </section>
+    </main>
+
+    <template id="rowTemplate">
+      <article class="person-row">
+        <div class="row-main">
+          <span class="order"></span>
+          <div>
+            <strong class="name"></strong>
+            <small class="note"></small>
+          </div>
+        </div>
+        <label class="check-label">
+          <input class="exclude-input" type="checkbox">
+          対象外
+        </label>
+        <input class="number-input" type="text" inputmode="numeric" pattern="[0-9]*" placeholder="番号" autocomplete="off">
+        <input class="date-text-input" type="text" inputmode="numeric" autocomplete="off">
+        <button class="delete-person-button" type="button">削除</button>
+      </article>
+    </template>
+
+    <script src="./app.js"></script>
+  </body>
+</html>
