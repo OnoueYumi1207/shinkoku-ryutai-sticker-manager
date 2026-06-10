@@ -35,11 +35,13 @@ const INITIAL_PEOPLE = [
   ["松川栗実", ""],
 ];
 
-const STORAGE_KEY = "shinkoku-ryutai-sticker-manager-v1";
+const STORAGE_KEY = "shinkoku-ryutai-sticker-manager-v2";
+const LEGACY_STORAGE_KEYS = ["shinkoku-ryutai-sticker-manager-v1"];
 
 const DEFAULT_RANGES = {};
 
 if (new URLSearchParams(window.location.search).has("reset")) {
+  LEGACY_STORAGE_KEYS.forEach((key) => localStorage.removeItem(key));
   localStorage.removeItem(STORAGE_KEY);
   window.history.replaceState(null, "", window.location.pathname);
 }
@@ -534,6 +536,7 @@ function exportCsv() {
 
 function resetState() {
   if (!window.confirm("保存済みデータを消して、写真ベースの初期名簿に戻しますか？")) return;
+  LEGACY_STORAGE_KEYS.forEach((key) => localStorage.removeItem(key));
   state = createInitialState();
   saveAndRender("初期状態に戻しました。");
 }
