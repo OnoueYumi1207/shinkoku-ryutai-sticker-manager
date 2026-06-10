@@ -33,12 +33,25 @@ const INITIAL_PEOPLE = [
   ["河本ひとみ", ""],
   ["横澤亜紀子", ""],
   ["松川栗実", ""],
+  ["工藤法子", "", "界光"],
+  ["工藤順子", "", "界光"],
+  ["佐藤弦美", "", "界光"],
+  ["塩越浩之", "", "界光"],
+  ["塩越直子", "", "界光"],
+  ["工藤美代子", "", "界光"],
+  ["竹中亮子", "", "界光"],
 ];
 
 const STORAGE_KEY = "shinkoku-ryutai-sticker-manager-v2";
 const LEGACY_STORAGE_KEYS = ["shinkoku-ryutai-sticker-manager-v1"];
 
 const DEFAULT_RANGES = {};
+
+const DEFAULT_RECORDS_BY_NAME = {
+  "國吉綾乃": {
+    "界光": { status: "excluded", number: "", dateText: "" },
+  },
+};
 
 if (new URLSearchParams(window.location.search).has("reset")) {
   LEGACY_STORAGE_KEYS.forEach((key) => localStorage.removeItem(key));
@@ -74,18 +87,20 @@ const elements = {
 let state = loadState();
 
 function createInitialState() {
-  return {
+  const initialState = {
     selectedCeremony: CEREMONIES[0],
-    people: INITIAL_PEOPLE.map(([name, note], index) => ({
+    people: INITIAL_PEOPLE.map(([name, note, startCeremony], index) => ({
       id: crypto.randomUUID(),
       order: index + 1,
       name,
       note,
-      startCeremony: CEREMONIES[0],
+      startCeremony: startCeremony || CEREMONIES[0],
     })),
     records: {},
     ranges: { ...DEFAULT_RANGES },
   };
+  applyDefaultRecords(initialState);
+  return initialState;
 }
 
 function loadState() {
@@ -115,7 +130,7 @@ function migrateState(savedState) {
   const existingByName = new Map(normalizedPeople.map((person) => [person.name, person]));
   const allowedIds = new Set();
 
-  savedState.people = INITIAL_PEOPLE.map(([name, note], index) => {
+  savedState.people = INITIAL_PEOPLE.map(([name, note, startCeremony], index) => {
     const existing = existingByName.get(name);
     const id = existing?.id || crypto.randomUUID();
     allowedIds.add(id);
@@ -124,7 +139,7 @@ function migrateState(savedState) {
       order: index + 1,
       name,
       note,
-      startCeremony: CEREMONIES[0],
+      startCeremony: startCeremony || CEREMONIES[0],
     };
   });
 
@@ -136,7 +151,22 @@ function migrateState(savedState) {
     ...DEFAULT_RANGES,
     ...(savedState.ranges || {}),
   };
+  applyDefaultRecords(savedState);
   return savedState;
+}
+
+function applyDefaultRecords(targetState) {
+  const peopleByName = new Map(targetState.people.map((person) => [person.name, person]));
+  Object.entries(DEFAULT_RECORDS_BY_NAME).forEach(([name, recordsByCeremony]) => {
+    const person = peopleByName.get(name);
+    if (!person) return;
+    targetState.records[person.id] ||= {};
+    Object.entries(recordsByCeremony).forEach(([ceremony, record]) => {
+      const current = normalizeRecord(targetState.records[person.id][ceremony]);
+      if (current.status !== "blank" || current.number || current.dateText) return;
+      targetState.records[person.id][ceremony] = normalizeRecord(record);
+    });
+  });
 }
 
 function saveState() {
