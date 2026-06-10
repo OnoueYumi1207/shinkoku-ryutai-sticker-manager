@@ -50,6 +50,13 @@ const INITIAL_PEOPLE = [
 
 const STORAGE_KEY = "shinkoku-ryutai-sticker-manager-v1";
 
+const DEFAULT_RANGES = {
+  "収天": { start: "305", end: "332" },
+  "地空": { start: "290", end: "318" },
+  "界光": { start: "307", end: "334" },
+  "明王": { start: "148", end: "175" },
+};
+
 if (new URLSearchParams(window.location.search).has("reset")) {
   localStorage.removeItem(STORAGE_KEY);
   window.history.replaceState(null, "", window.location.pathname);
@@ -93,6 +100,7 @@ function createInitialState() {
       startCeremony: CEREMONIES[0],
     })),
     records: {},
+    ranges: { ...DEFAULT_RANGES },
   };
 }
 
@@ -120,6 +128,10 @@ function migrateState(savedState) {
     name: nameFixes.get(person.name) || person.name,
     startCeremony: person.startCeremony || (person.name === "小椋大地" ? "地空" : CEREMONIES[0]),
   }));
+  savedState.ranges = {
+    ...DEFAULT_RANGES,
+    ...(savedState.ranges || {}),
+  };
   return savedState;
 }
 
@@ -344,6 +356,21 @@ function clearBulkDateInput() {
   elements.bulkDateText.value = "";
 }
 
+function loadRangeInputs() {
+  const range = state.ranges?.[state.selectedCeremony] || {};
+  elements.startNumber.value = range.start || "";
+  elements.endNumber.value = range.end || "";
+}
+
+function saveRangeInputs() {
+  state.ranges ||= {};
+  state.ranges[state.selectedCeremony] = {
+    start: elements.startNumber.value.trim(),
+    end: elements.endNumber.value.trim(),
+  };
+  saveState();
+}
+
 function setStatus(message) {
   elements.statusText.textContent = message;
 }
@@ -511,9 +538,12 @@ function resetState() {
 
 elements.ceremonySelect.addEventListener("change", () => {
   state.selectedCeremony = elements.ceremonySelect.value;
+  loadRangeInputs();
   clearBulkDateInput();
   saveAndRender(`${state.selectedCeremony}を表示しています。`);
 });
+elements.startNumber.addEventListener("change", saveRangeInputs);
+elements.endNumber.addEventListener("change", saveRangeInputs);
 elements.assignButton.addEventListener("click", assignNumbers);
 elements.copyExclusionsButton.addEventListener("click", copyPreviousExclusions);
 elements.exportCsvButton.addEventListener("click", exportCsv);
@@ -529,4 +559,5 @@ elements.newPersonName.addEventListener("keydown", (event) => {
 
 clearBulkDateInput();
 render();
+loadRangeInputs();
 setStatus("準備できました。対象外にチェックを入れると、自動割り振りで飛ばします。");
