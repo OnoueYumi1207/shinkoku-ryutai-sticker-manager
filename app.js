@@ -18,34 +18,6 @@ const CEREMONIES = [
 ];
 
 const INITIAL_PEOPLE = [
-  ["細田倫宏", ""],
-  ["田辺利幸", ""],
-  ["松本良喜", ""],
-  ["尾ノ上卓朗", ""],
-  ["尾ノ上楓雅", ""],
-  ["尾ノ上結良", ""],
-  ["柳本悠馬", ""],
-  ["米倉弦希", ""],
-  ["堀之内敬一", ""],
-  ["柳本睦美", ""],
-  ["細田ゆう子", ""],
-  ["尾ノ上裕美", ""],
-  ["田辺恵子", ""],
-  ["中島知里", ""],
-  ["佐野よう子", ""],
-  ["宮下よし子", ""],
-  ["渡辺和美", ""],
-  ["宮川康子", ""],
-  ["宮川エブリン", ""],
-  ["米倉三穂", ""],
-  ["小椋裕美子", "会"],
-  ["白井知子", "会"],
-  ["白井里美", "会"],
-  ["南湖ゆかり", "会"],
-  ["米倉健一", "会"],
-  ["米倉廉人", "会"],
-  ["川手真紀", "会"],
-  ["深作亜紀子", "会"],
   ["芦田裕善", ""],
   ["武藤哲也", ""],
   ["小川昌昭", ""],
@@ -138,22 +110,29 @@ function migrateState(savedState) {
     ["小柳裕美子", "小椋裕美子"],
   ]);
 
-  savedState.people = savedState.people.map((person) => ({
+  const normalizedPeople = savedState.people.map((person) => ({
     ...person,
     name: nameFixes.get(person.name) || person.name,
     startCeremony: person.startCeremony || (person.name === "小椋大地" ? "地空" : CEREMONIES[0]),
   }));
+  const existingByName = new Map(normalizedPeople.map((person) => [person.name, person]));
+  const allowedIds = new Set();
 
-  const existingNames = new Set(savedState.people.map((person) => person.name));
-  INITIAL_PEOPLE.forEach(([name, note]) => {
-    if (existingNames.has(name)) return;
-    savedState.people.push({
-      id: crypto.randomUUID(),
-      order: savedState.people.length + 1,
+  savedState.people = INITIAL_PEOPLE.map(([name, note], index) => {
+    const existing = existingByName.get(name);
+    const id = existing?.id || crypto.randomUUID();
+    allowedIds.add(id);
+    return {
+      id,
+      order: index + 1,
       name,
       note,
       startCeremony: CEREMONIES[0],
-    });
+    };
+  });
+
+  Object.keys(savedState.records || {}).forEach((personId) => {
+    if (!allowedIds.has(personId)) delete savedState.records[personId];
   });
 
   savedState.ranges = {
