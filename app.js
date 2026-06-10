@@ -40,6 +40,16 @@ const INITIAL_PEOPLE = [
   ["塩越直子", "", "界光"],
   ["工藤美代子", "", "界光"],
   ["竹中亮子", "", "界光"],
+  ["荒木芳一", "", "明王"],
+  ["荒木雄一郎", "", "明王"],
+  ["荒木幸子", "", "明王"],
+  ["錦織優旗", "", "明王"],
+  ["錦織美咲", "", "明王"],
+  ["錦織光桜璃", "", "明王"],
+  ["錦織碧翼", "", "明王"],
+  ["錦織煌鵬", "", "明王"],
+  ["錦織世旺", "", "明王"],
+  ["錦織圭外", "", "明王"],
 ];
 
 const STORAGE_KEY = "shinkoku-ryutai-sticker-manager-v2";
@@ -51,6 +61,43 @@ const DEFAULT_RECORDS_BY_NAME = {
   "國吉綾乃": {
     "界光": { status: "excluded", number: "", dateText: "" },
   },
+};
+
+const CEREMONY_ROSTERS = {
+  "明王": [
+    "芦田裕善",
+    "武藤哲也",
+    "小川昌昭",
+    "横澤博明",
+    "三國玄洋",
+    "荒木芳一",
+    "荒木雄一郎",
+    "武藤友紀",
+    "三國友美",
+    "三國天音",
+    "野村香與",
+    "牧博子",
+    "四方聖子",
+    "河本ひとみ",
+    "横澤亜紀子",
+    "荒木幸子",
+    "工藤法子",
+    "工藤順子",
+    "佐藤弦美",
+    "塩越浩之",
+    "塩越直子",
+    "工藤美代子",
+    "竹中亮子",
+    "錦織優旗",
+    "錦織美咲",
+    "錦織光桜璃",
+    "錦織碧翼",
+    "錦織煌鵬",
+    "錦織世旺",
+    "錦織圭外",
+    "國吉綾乃",
+    "松川栗実",
+  ],
 };
 
 if (new URLSearchParams(window.location.search).has("reset")) {
@@ -251,6 +298,15 @@ function isPersonVisibleForCeremony(person, ceremony = state.selectedCeremony) {
 }
 
 function getVisiblePeople(ceremony = state.selectedCeremony) {
+  const roster = CEREMONY_ROSTERS[ceremony];
+  if (roster) {
+    const peopleByName = new Map(state.people.map((person) => [person.name, person]));
+    return roster
+      .map((name) => peopleByName.get(name))
+      .filter(Boolean)
+      .filter((person) => isPersonVisibleForCeremony(person, ceremony));
+  }
+
   return state.people
     .filter((person) => isPersonVisibleForCeremony(person, ceremony))
     .sort((a, b) => a.order - b.order);
@@ -426,9 +482,7 @@ function assignNumbers() {
 
   elements.bulkDateText.value = dateText;
 
-  const targets = state.people
-    .filter((person) => isPersonVisibleForCeremony(person))
-    .sort((a, b) => a.order - b.order)
+  const targets = getVisiblePeople()
     .filter((person) => getRecord(person.id).status !== "excluded");
 
   const available = end - start + 1;
