@@ -46,6 +46,21 @@ const INITIAL_PEOPLE = [
   ["米倉廉人", "会"],
   ["川手真紀", "会"],
   ["深作亜紀子", "会"],
+  ["芦田裕善", ""],
+  ["武藤哲也", ""],
+  ["小川昌昭", ""],
+  ["横澤博明", ""],
+  ["三國玄洋", ""],
+  ["武藤友紀", ""],
+  ["三國友美", ""],
+  ["三國天音", ""],
+  ["野村香與", ""],
+  ["牧博子", ""],
+  ["四方聖子", ""],
+  ["國吉綾乃", ""],
+  ["河本ひとみ", ""],
+  ["横澤亜紀子", ""],
+  ["松川栗実", ""],
 ];
 
 const STORAGE_KEY = "shinkoku-ryutai-sticker-manager-v1";
@@ -128,6 +143,19 @@ function migrateState(savedState) {
     name: nameFixes.get(person.name) || person.name,
     startCeremony: person.startCeremony || (person.name === "小椋大地" ? "地空" : CEREMONIES[0]),
   }));
+
+  const existingNames = new Set(savedState.people.map((person) => person.name));
+  INITIAL_PEOPLE.forEach(([name, note]) => {
+    if (existingNames.has(name)) return;
+    savedState.people.push({
+      id: crypto.randomUUID(),
+      order: savedState.people.length + 1,
+      name,
+      note,
+      startCeremony: CEREMONIES[0],
+    });
+  });
+
   savedState.ranges = {
     ...DEFAULT_RANGES,
     ...(savedState.ranges || {}),
