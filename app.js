@@ -37,12 +37,7 @@ const INITIAL_PEOPLE = [
 
 const STORAGE_KEY = "shinkoku-ryutai-sticker-manager-v1";
 
-const DEFAULT_RANGES = {
-  "収天": { start: "305", end: "332" },
-  "地空": { start: "290", end: "318" },
-  "界光": { start: "307", end: "334" },
-  "明王": { start: "148", end: "175" },
-};
+const DEFAULT_RANGES = {};
 
 if (new URLSearchParams(window.location.search).has("reset")) {
   localStorage.removeItem(STORAGE_KEY);
