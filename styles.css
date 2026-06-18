@@ -389,9 +389,10 @@ input[inputmode="numeric"] {
 
 .overview-table td:nth-child(2),
 .overview-table th:nth-child(2) {
-  width: 170px;
+  width: 128px;
   text-align: left;
-  padding-left: 10px;
+  padding-left: 4px;
+  padding-right: 4px;
   background: #f7f4ee;
 }
 
