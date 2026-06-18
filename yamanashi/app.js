@@ -48,11 +48,12 @@ const INITIAL_PEOPLE = [
   ["深作亜紀子", "会"],
 ];
 
-const STORAGE_KEY = "shinkoku-ryutai-yamanashi-v2";
+const STORAGE_KEY = "shinkoku-ryutai-yamanashi-v3";
 const LEGACY_STORAGE_KEYS = [
   "shinkoku-ryutai-sticker-manager-v1",
   "shinkoku-ryutai-sticker-manager-v2",
   "shinkoku-ryutai-yamanashi-v1",
+  "shinkoku-ryutai-yamanashi-v2",
 ];
 
 const DEFAULT_RANGES = {
@@ -65,6 +66,10 @@ const DEFAULT_RANGES = {
 const DEFAULT_RECORDS_BY_NAME = {};
 
 const CEREMONY_ROSTERS = {};
+
+const DEFAULT_DATES = {
+  "収天": "6/8",
+};
 
 if (new URLSearchParams(window.location.search).has("reset")) {
   LEGACY_STORAGE_KEYS.forEach((key) => localStorage.removeItem(key));
@@ -169,6 +174,26 @@ function migrateState(savedState) {
 }
 
 function applyDefaultRecords(targetState) {
+  Object.entries(DEFAULT_RANGES).forEach(([ceremony, range]) => {
+    const start = Number(range.start);
+    const end = Number(range.end);
+    if (!Number.isInteger(start) || !Number.isInteger(end) || end < start) return;
+
+    let number = start;
+    getVisiblePeopleFromState(targetState, ceremony).forEach((person) => {
+      if (number > end) return;
+      targetState.records[person.id] ||= {};
+      const current = normalizeRecord(targetState.records[person.id][ceremony]);
+      if (current.status !== "blank" || current.number || current.dateText) return;
+      targetState.records[person.id][ceremony] = {
+        status: "assigned",
+        number: String(number),
+        dateText: DEFAULT_DATES[ceremony] || "",
+      };
+      number += 1;
+    });
+  });
+
   const peopleByName = new Map(targetState.people.map((person) => [person.name, person]));
   Object.entries(DEFAULT_RECORDS_BY_NAME).forEach(([name, recordsByCeremony]) => {
     const person = peopleByName.get(name);
@@ -180,6 +205,12 @@ function applyDefaultRecords(targetState) {
       targetState.records[person.id][ceremony] = normalizeRecord(record);
     });
   });
+}
+
+function getVisiblePeopleFromState(targetState, ceremony) {
+  return targetState.people
+    .filter((person) => ceremonyIndex(ceremony) >= ceremonyIndex(person.startCeremony || CEREMONIES[0]))
+    .sort((a, b) => a.order - b.order);
 }
 
 function saveState() {
