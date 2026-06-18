@@ -51,7 +51,12 @@ const INITIAL_PEOPLE = [
 const STORAGE_KEY = "shinkoku-ryutai-yamanashi-v1";
 const LEGACY_STORAGE_KEYS = ["shinkoku-ryutai-sticker-manager-v1", "shinkoku-ryutai-sticker-manager-v2"];
 
-const DEFAULT_RANGES = {};
+const DEFAULT_RANGES = {
+  "収天": { start: "305", end: "332" },
+  "地空": { start: "290", end: "318" },
+  "界光": { start: "307", end: "334" },
+  "明王": { start: "148", end: "175" },
+};
 
 const DEFAULT_RECORDS_BY_NAME = {};
 
