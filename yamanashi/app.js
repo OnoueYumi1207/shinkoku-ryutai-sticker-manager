@@ -48,8 +48,12 @@ const INITIAL_PEOPLE = [
   ["深作亜紀子", "会"],
 ];
 
-const STORAGE_KEY = "shinkoku-ryutai-yamanashi-v1";
-const LEGACY_STORAGE_KEYS = ["shinkoku-ryutai-sticker-manager-v1", "shinkoku-ryutai-sticker-manager-v2"];
+const STORAGE_KEY = "shinkoku-ryutai-yamanashi-v2";
+const LEGACY_STORAGE_KEYS = [
+  "shinkoku-ryutai-sticker-manager-v1",
+  "shinkoku-ryutai-sticker-manager-v2",
+  "shinkoku-ryutai-yamanashi-v1",
+];
 
 const DEFAULT_RANGES = {
   "収天": { start: "305", end: "332" },
