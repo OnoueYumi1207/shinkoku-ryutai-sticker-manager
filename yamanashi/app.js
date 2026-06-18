@@ -48,12 +48,13 @@ const INITIAL_PEOPLE = [
   ["深作亜紀子", "会"],
 ];
 
-const STORAGE_KEY = "shinkoku-ryutai-yamanashi-v3";
+const STORAGE_KEY = "shinkoku-ryutai-yamanashi-v4";
 const LEGACY_STORAGE_KEYS = [
   "shinkoku-ryutai-sticker-manager-v1",
   "shinkoku-ryutai-sticker-manager-v2",
   "shinkoku-ryutai-yamanashi-v1",
   "shinkoku-ryutai-yamanashi-v2",
+  "shinkoku-ryutai-yamanashi-v3",
 ];
 
 const DEFAULT_RANGES = {
@@ -67,9 +68,7 @@ const DEFAULT_RECORDS_BY_NAME = {};
 
 const CEREMONY_ROSTERS = {};
 
-const DEFAULT_DATES = {
-  "収天": "6/8",
-};
+const DEFAULT_DATES = {};
 
 if (new URLSearchParams(window.location.search).has("reset")) {
   LEGACY_STORAGE_KEYS.forEach((key) => localStorage.removeItem(key));
@@ -352,6 +351,9 @@ function renderEditor() {
       dateTextInput.addEventListener("change", () => {
         if (!updatePersonRecord(person, numberInput, dateTextInput)) return;
         saveAndRender("受渡日を更新しました。");
+      });
+      dateTextInput.addEventListener("focus", () => {
+        dateTextInput.select();
       });
 
       deleteButton.addEventListener("click", () => {
