@@ -177,6 +177,7 @@ function migrateState(savedState) {
   const existingByName = new Map(normalizedPeople.map((person) => [person.name, person]));
   const allowedIds = new Set();
 
+  const initialNames = new Set(INITIAL_PEOPLE.map(([name]) => name));
   savedState.people = INITIAL_PEOPLE.map(([name, note, startCeremony], index) => {
     const existing = existingByName.get(name);
     const id = existing?.id || crypto.randomUUID();
@@ -189,6 +190,16 @@ function migrateState(savedState) {
       startCeremony: startCeremony || CEREMONIES[0],
     };
   });
+  normalizedPeople
+    .filter((person) => !initialNames.has(person.name))
+    .sort((a, b) => a.order - b.order)
+    .forEach((person) => {
+      allowedIds.add(person.id);
+      savedState.people.push({
+        ...person,
+        order: savedState.people.length + 1,
+      });
+    });
 
   Object.keys(savedState.records || {}).forEach((personId) => {
     if (!allowedIds.has(personId)) delete savedState.records[personId];
@@ -301,10 +312,16 @@ function getVisiblePeople(ceremony = state.selectedCeremony) {
   const roster = CEREMONY_ROSTERS[ceremony];
   if (roster) {
     const peopleByName = new Map(state.people.map((person) => [person.name, person]));
-    return roster
+    const rosterNames = new Set(roster);
+    const rosterPeople = roster
       .map((name) => peopleByName.get(name))
       .filter(Boolean)
       .filter((person) => isPersonVisibleForCeremony(person, ceremony));
+    const extraPeople = state.people
+      .filter((person) => !rosterNames.has(person.name))
+      .filter((person) => isPersonVisibleForCeremony(person, ceremony))
+      .sort((a, b) => a.order - b.order);
+    return [...rosterPeople, ...extraPeople];
   }
 
   return state.people
